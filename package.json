@@ -1,0 +1,28 @@
+{
+  "name": "whot-server",
+  "version": "1.0.0",
+  "description": "A web server for Whot!",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mykeels/whot-server.git"
+  },
+  "keywords": [
+    "whot",
+    "server"
+  ],
+  "author": "mykeels",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/mykeels/whot-server/issues"
+  },
+  "homepage": "https://github.com/mykeels/whot-server#readme",
+  "dependencies": {
+    "body-parser": "^1.18.2",
+    "express": "^4.16.2",
+    "express-ws": "^3.0.0"
+  }
+}
