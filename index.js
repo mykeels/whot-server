@@ -5,6 +5,7 @@ const GameFactory = require('./factories/game.factory')
 const factory = new GameFactory()
 const indexRoute = require('./routes/index.route')
 const gameRoute = require('./routes/game.route')(factory)
+const socketRoute = require('./routes/socket.route')
 
 app = express()
 
@@ -13,6 +14,7 @@ app.use(bodyParser.urlencoded({ extended: false }))
 
 app.use('/', indexRoute)
 app.use('/games/', gameRoute)
+app.use('/game/', socketRoute)
 
 app.use(function(req, res, next) {
     var err = new Error('Not Found')
