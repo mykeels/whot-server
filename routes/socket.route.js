@@ -7,7 +7,10 @@ const logger = require('../logger')('socket.route.js')
 
 const Events = {
     GAME_CREATE: 'game:create',
-    GAME_START: 'game:start'
+    GAME_START: 'game:start',
+    PLAYER_HAND: 'player:hand',
+    TURN_SWITCH: 'turn:switch',
+    MARKET_PICK: 'market:pick'
 }
 
 const extendWs = require('../prototypes/ws.prototype')
@@ -50,7 +53,9 @@ module.exports = (app, factory = new GameFactory()) => {
                         ws.type = 'player'
                         instance.sockets.players.push(ws)
                         game.turn.all((player) => {
-                            player.socket = instance.sockets.players.find((socket) => socket.id === player.id)
+                            if (!player.socket) {
+                                player.socket = instance.sockets.players.find((socket) => socket.id === player.id)
+                            }
                         })
                     }
                     else {
@@ -66,6 +71,17 @@ module.exports = (app, factory = new GameFactory()) => {
                 //start game
                 if (instance.sockets.players.length === game.turn.count()) {
                     instance.sockets.broadcast({ message: Events.GAME_START })
+                    game.turn.all((player) => {
+                        player.socket.json({ message: Events.PLAYER_HAND, hand: player.hand() })
+                    })
+                    
+                    const player = game.turn.next()
+                    if (player.canPlay()) {
+                        player.socket.json({ message: Events.TURN_SWITCH })
+                    }
+                    else {
+                        player.socket.json({ message: Events.MARKET_PICK, cards: player.pick() })
+                    }
                 }
         
                 //onmessage
