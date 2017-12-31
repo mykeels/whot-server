@@ -37,12 +37,21 @@ module.exports = (app, factory = new GameFactory()) => {
             const instance = factory.get(id)
             if (instance) {
                 const game = instance.game
+
+                /**
+                 * ws.id is player id
+                 * ws.type is player type
+                 */
                 
                 if (!(ws.id && ws.type)) {
                     if (instance.sockets.players.length < game.turn.count() && instance.sockets.players.indexOf(ws) < 0) {
                         ws.id = instance.sockets.players.length + 1
                         ws.type = 'player'
                         instance.sockets.players.push(ws)
+                        game.turn.all((player) => {
+                            player.socket = instance.sockets.players.find((socket) => socket.id === player.id)
+                        })
+                        
                     }
                     else {
                         ws.id = instance.sockets.listeners.length + 1
