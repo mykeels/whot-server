@@ -12,7 +12,22 @@ function GameFactory() {
                             listeners: []
                         }
                     }
-        games[id].sockets.stats = () => ({ players: games[id].sockets.players.length, listeners: games[id].sockets.listeners.length })
+        const sockets = games[id].sockets
+        sockets.stats = () => ({ players: sockets.players.length, listeners: sockets.listeners.length })
+        sockets.players.broadcast = (data) => {
+            sockets.players.forEach((socket) => {
+                socket.json(data)
+            })
+        }
+        sockets.listeners.broadcast = (data) => {
+            sockets.listeners.forEach((socket) => {
+                socket.json(data)
+            })
+        }
+        sockets.broadcast = (data) => {
+            sockets.players.broadcast(data)
+            sockets.listeners.broadcast(data)
+        }
         return { id, noOfPlayers: game.turn.count() }
     }
 

@@ -6,7 +6,8 @@ const GameFactory = require('../factories/game.factory')
 const logger = require('../logger')('socket.route.js')
 
 const Events = {
-    GAME_CREATE: 'game:create'
+    GAME_CREATE: 'game:create',
+    GAME_START: 'game:start'
 }
 
 const extendWs = require('../prototypes/ws.prototype')
@@ -51,7 +52,6 @@ module.exports = (app, factory = new GameFactory()) => {
                         game.turn.all((player) => {
                             player.socket = instance.sockets.players.find((socket) => socket.id === player.id)
                         })
-                        
                     }
                     else {
                         ws.id = instance.sockets.listeners.length + 1
@@ -62,6 +62,11 @@ module.exports = (app, factory = new GameFactory()) => {
 
                 //onopen
                 ws.json(Object.assign({ id, message: Events.GAME_CREATE, playerId: ws.id, type: ws.type }, instance.sockets.stats()))
+
+                //start game
+                if (instance.sockets.players.length === game.turn.count()) {
+                    instance.sockets.broadcast({ message: Events.GAME_START })
+                }
         
                 //onmessage
                 ws.on('message', (message = '') => {
