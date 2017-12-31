@@ -4,7 +4,15 @@ function GameFactory() {
 
     this.create = (game) => {
         const id = ++count
-        games[id] = game
+        games[id] = { 
+                        id,
+                        game, 
+                        sockets: {
+                            players: [],
+                            listeners: []
+                        }
+                    }
+        games[id].sockets.stats = () => ({ players: games[id].sockets.players.length, listeners: games[id].sockets.listeners.length })
         return { id, noOfPlayers: game.turn.count() }
     }
 
