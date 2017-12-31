@@ -1,11 +1,11 @@
 function GameFactory() {
-    const count = 0
+    let count = 0
     const games = {}
 
     this.create = (game) => {
-        const id = ++this.count
+        const id = ++count
         games[id] = game
-        return id
+        return { id, noOfPlayers: game.turn.count() }
     }
 
     this.get = (id) => {
@@ -18,7 +18,9 @@ function GameFactory() {
     
     this.count = () => count
 
-
+    this.games = () => {
+        return Object.keys(games)
+    }
 }
 
 module.exports = GameFactory
