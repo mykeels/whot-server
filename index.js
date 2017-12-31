@@ -14,7 +14,8 @@ app.use(bodyParser.urlencoded({ extended: false }))
 
 app.use('/', indexRoute)
 app.use('/games/', gameRoute)
-app.use('/game/', socketRoute)
+
+socketRoute(app, factory)
 
 app.use(function(req, res, next) {
     var err = new Error('Not Found')

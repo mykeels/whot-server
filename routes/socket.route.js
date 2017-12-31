@@ -1,12 +1,15 @@
 const express = require('express')
 const router = express.Router()
+const expressWs = require('express-ws')
+const Game = require('whot')
+const GameFactory = require('../factories/game.factory')
 
-require('express-ws')(router)
+module.exports = (app, factory = new GameFactory()) => {
+    expressWs(app)
 
-router.ws('', (ws, req) => {
-    ws.on('message', (message = '') => {
-        ws.send('hello')
+    app.ws('/game/:id', (ws, req) => {
+        ws.on('message', (message = '') => {
+            ws.send('hello ' + req.params.id)
+        })
     })
-})
-
-module.exports = router
+}
