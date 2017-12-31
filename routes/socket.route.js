@@ -69,7 +69,7 @@ module.exports = (app, factory = new GameFactory()) => {
                 ws.json(Object.assign({ id, message: Events.GAME_CREATE, playerId: ws.id, type: ws.type }, instance.sockets.stats()))
 
                 //start game
-                if (instance.sockets.players.length === game.turn.count()) {
+                if (instance.sockets.players.length === game.turn.count() && instance.sockets.listeners.length === 0) {
                     instance.sockets.broadcast({ message: Events.GAME_START })
                     game.turn.all((player) => {
                         player.socket.json({ message: Events.PLAYER_HAND, hand: player.hand() })
