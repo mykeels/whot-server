@@ -30,8 +30,23 @@ const errorThrow = (err, ws) => {
     }
 }
 
+const playTurn = (game) => {
+    const player = game.turn.next()
+    if (player.canPlay()) {
+        player.socket.json({ message: Events.TURN_SWITCH })
+    }
+    else {
+        //pick cards from the market and switch to the next player
+        player.socket.json({ message: Events.MARKET_PICK, cards: player.pick() })
+        game.turn.switch()
+        playTurn(game)
+    }
+}
+
 module.exports = (app, factory = new GameFactory()) => {
     expressWs(app)
+    
+    factory.create(new Game({ noOfPlayers: 4 })) //ONLY FOR TESTS
 
     app.ws('/game/:id', (ws, req) => {
         extendWs(ws)
@@ -75,13 +90,7 @@ module.exports = (app, factory = new GameFactory()) => {
                         player.socket.json({ message: Events.PLAYER_HAND, hand: player.hand() })
                     })
                     
-                    const player = game.turn.next()
-                    if (player.canPlay()) {
-                        player.socket.json({ message: Events.TURN_SWITCH })
-                    }
-                    else {
-                        player.socket.json({ message: Events.MARKET_PICK, cards: player.pick() })
-                    }
+                    playTurn(game)
                 }
         
                 //onmessage
