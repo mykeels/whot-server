@@ -14,19 +14,19 @@ function GameFactory() {
                     }
         const sockets = games[id].sockets
         sockets.stats = () => ({ players: sockets.players.length, listeners: sockets.listeners.length })
-        sockets.players.broadcast = (data) => {
-            sockets.players.forEach((socket) => {
+        sockets.players.broadcast = (data, exceptWs) => {
+            sockets.players.filter(ws => !exceptWs || (ws != exceptWs)).forEach((socket) => {
                 socket.json(data)
             })
         }
-        sockets.listeners.broadcast = (data) => {
-            sockets.listeners.forEach((socket) => {
+        sockets.listeners.broadcast = (data, exceptWs) => {
+            sockets.listeners.filter(ws => !exceptWs || (ws != exceptWs)).forEach((socket) => {
                 socket.json(data)
             })
         }
-        sockets.broadcast = (data) => {
-            sockets.players.broadcast(data)
-            sockets.listeners.broadcast(data)
+        sockets.broadcast = (data, exceptWs) => {
+            sockets.players.broadcast(data, exceptWs)
+            sockets.listeners.broadcast(data, exceptWs)
         }
         return { id, noOfPlayers: game.turn.count() }
     }
