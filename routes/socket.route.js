@@ -85,7 +85,7 @@ module.exports = (app, factory = new GameFactory()) => {
 
                 //start game
                 if (instance.sockets.players.length === game.turn.count() && instance.sockets.listeners.length === 0) {
-                    instance.sockets.broadcast({ message: Events.GAME_START })
+                    instance.sockets.broadcast({ message: Events.GAME_START, pile: game.pile.top() })
                     game.turn.all((player) => {
                         player.socket.json({ message: Events.PLAYER_HAND, hand: player.hand() })
                     })
@@ -97,7 +97,25 @@ module.exports = (app, factory = new GameFactory()) => {
                 ws.on('message', (message = '') => {
                     const messageData = JSON.parse(message)
                     switch (messageData.message) {
-                        case '':
+                        case 'player:play':
+                            if (game.turn.next().id === ws.id) {
+                                const player = game.turn.next()
+                                const cardIndex = messageData.index
+                                const iNeed = messageData.iNeed
+                                if (cardIndex >= 0 && cardIndex < player.hand().length) {
+                                    const card = player.play(cardIndex, iNeed)
+                                    instance.sockets.broadcast({ message: 'player:play', id: ws.id, card }, ws) //broadcast to all except current ws
+                                    ws.json({ message: 'player:hand', hand: player.hand() })
+                                    game.turn.execute(game.pile.top())
+                                    playTurn(game)
+                                }
+                                else {
+                                    errorThrow('error:invalid-card-index', ws)
+                                }
+                            }
+                            else {
+                                errorThrow('error:player-out-of-turn', ws)
+                            }
                         break;
                     }
                 })
