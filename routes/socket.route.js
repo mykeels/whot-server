@@ -9,6 +9,7 @@ const Events = {
     GAME_CREATE: 'game:create',
     GAME_START: 'game:start',
     PLAYER_HAND: 'player:hand',
+    PLAY: 'player:play',
     TURN_SWITCH: 'turn:switch',
     MARKET_PICK: 'market:pick'
 }
@@ -37,7 +38,8 @@ const playTurn = (game) => {
     }
     else {
         //pick cards from the market and switch to the next player
-        player.socket.json({ message: Events.MARKET_PICK, cards: player.pick() })
+        player.pick()
+        player.socket.json({ message: Events.PLAYER_HAND, hand: player.hand() })
         game.turn.switch()
         playTurn(game)
     }
@@ -97,21 +99,51 @@ module.exports = (app, factory = new GameFactory()) => {
                 ws.on('message', (message = '') => {
                     const messageData = JSON.parse(message)
                     switch (messageData.message) {
-                        case 'player:play':
+                        case Events.PLAY:
                             if (game.turn.next().id === ws.id) {
                                 const player = game.turn.next()
                                 const cardIndex = messageData.index
                                 const iNeed = messageData.iNeed
                                 if (cardIndex >= 0 && cardIndex < player.hand().length) {
-                                    const card = player.play(cardIndex, iNeed)
-                                    instance.sockets.broadcast({ message: 'player:play', id: ws.id, card }, ws) //broadcast to all except current ws
-                                    ws.json({ message: 'player:hand', hand: player.hand() })
-                                    game.turn.execute(game.pile.top())
-                                    playTurn(game)
+                                    if (game.pile.top().matches(player.hand()[cardIndex]) || iNeed) {
+                                        const card = player.play(cardIndex, iNeed)
+                                        if (card) {
+                                            instance.sockets.broadcast({ message: Events.PLAY, id: ws.id, card }, ws) //broadcast to all except current ws
+                                            ws.json({ message: Events.PLAYER_HAND, hand: player.hand() })
+                                            game.turn.execute(game.pile.top())
+                                            setTimeout(() => playTurn(game), 1000)
+                                        }
+                                        else {
+                                            errorThrow('error:could-not-play-card:' + cardIndex, ws)
+                                            setTimeout(() => ws.json({ message: Events.TURN_SWITCH }), 1000)
+                                        }
+                                    }
+                                    else {
+                                        errorThrow('error:card-not-match-pile:' + cardIndex, ws)
+
+                                        setTimeout(() => {
+                                            ws.json({ message: 'pile:top', card: game.pile.top() })
+                                            ws.json({ message: Events.TURN_SWITCH })
+                                        }, 1000)
+                                    }
                                 }
                                 else {
                                     errorThrow('error:invalid-card-index', ws)
                                 }
+                            }
+                            else {
+                                errorThrow('error:player-out-of-turn', ws)
+                            }
+                        break;
+                        case Events.MARKET_PICK:
+                            if (game.turn.next().id === ws.id) {
+                                setTimeout(() => {
+                                    const player = game.turn.next()
+                                    ws.json({ message: Events.MARKET_PICK, cards: player.pick() })
+                                    ws.json({ message: Events.PLAYER_HAND, hand: player.hand() })
+                                    game.turn.switch()
+                                    playTurn(game)
+                                }, 1000)
                             }
                             else {
                                 errorThrow('error:player-out-of-turn', ws)
