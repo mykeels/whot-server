@@ -14,7 +14,7 @@ npm start
 The following routes are available:
 
 | Category | Verb | Url | Description |
-| --- | --- | --- | --- | --- |
+| --- | --- | --- | --- |
 | Default | GET/POST | ~/ | Welcomes you to the API |
 | Games | GET | ~/games | Lists games |
 | Games | POST | ~/games | Creates a new Game |
@@ -23,7 +23,7 @@ The following routes are available:
 ## Socket Signals
 
 | Event | Originator | Parameters | Description |
-| --- | --- | --- | --- | --- |
+| --- | --- | --- | --- |
 | player:play | Client | index, iNeed | Player selects a card by index to play |
 | market:pick | Client | -- | Pleyer opts to pick from market |
 | player:hand | Server | hand | Shows Player's hand (cards) |
