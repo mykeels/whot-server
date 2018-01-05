@@ -1,0 +1,18 @@
+version: '2'
+
+services:
+    web:
+        build: .
+        container_name: whotserver
+        image: whotserver
+        volumes:
+            - .:/src
+            - ./docker_logs/whotserver:/var/log/applications/whotserver
+        ports:
+            - 8800
+        networks:
+          - main_network
+
+networks:
+  main_network:
+      driver: bridge

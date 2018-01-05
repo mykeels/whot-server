@@ -15,5 +15,6 @@ results
 
 node_modules
 npm-debug.log
+docker_logs
 .DS_Store
 public/.DS_Store
