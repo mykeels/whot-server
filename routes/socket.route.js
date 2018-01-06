@@ -131,7 +131,7 @@ module.exports = (app, factory = new GameFactory()) => {
                 }
 
                 // Listen for events and inform players about certain game events
-                listenAndInformPlayers(instacne);
+                listenAndInformPlayers(instance);
         
                 //onmessage
                 ws.on('message', (message = '') => {
