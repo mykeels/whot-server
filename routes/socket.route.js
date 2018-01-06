@@ -11,7 +11,12 @@ const Events = {
     PLAYER_HAND: 'player:hand',
     PLAY: 'player:play',
     TURN_SWITCH: 'turn:switch',
-    MARKET_PICK: 'market:pick'
+    MARKET_PICK: 'market:pick',
+    HOLD_ON: 'turn:holdon',
+    PICK_TWO: 'turn:pick-two',
+    PICK_THREE: 'turn:pick-three',
+    SUSPENSION: 'turn:suspension',
+    GENERAL_MARKET: 'turn:general-market'
 }
 
 const extendWs = require('../prototypes/ws.prototype')
@@ -49,6 +54,30 @@ const playTurn = (game) => {
             playTurn(game)
         }
     }
+}
+
+const listenAndInformPlayers = (instance) => {
+    const game = instance.game;
+
+    game.emitter.on(Events.HOLD_ON, (players) => {
+        instance.sockets.players.broadcast({ message: Events.HOLD_ON, players });
+    });
+
+    game.emitter.on(Events.PICK_TWO, (players) => {
+        instance.sockets.players.broadcast({ message: Events.PICK_TWO, players });
+    });
+
+    game.emitter.on(Events.PICK_THREE, (players) => {
+        instance.sockets.players.broadcast({ message: Events.PICK_THREE, players });
+    });
+
+    game.emitter.on(Events.SUSPENSION, (players) => {
+        instance.sockets.players.broadcast({ message: Events.SUSPENSION, players });
+    });
+
+    game.emitter.on(Events.GENERAL_MARKET, (players) => {
+        instance.sockets.players.broadcast({ message: Events.GENERAL_MARKET, players });
+    });
 }
 
 module.exports = (app, factory = new GameFactory()) => {
@@ -100,6 +129,9 @@ module.exports = (app, factory = new GameFactory()) => {
                     
                     playTurn(game)
                 }
+
+                // Listen for events and inform players about certain game events
+                listenAndInformPlayers(instacne);
         
                 //onmessage
                 ws.on('message', (message = '') => {
