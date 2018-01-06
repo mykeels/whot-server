@@ -37,11 +37,17 @@ const playTurn = (game) => {
         player.socket.json({ message: Events.TURN_SWITCH })
     }
     else {
-        //pick cards from the market and switch to the next player
-        player.pick()
-        player.socket.json({ message: Events.PLAYER_HAND, hand: player.hand() })
-        game.turn.switch()
-        playTurn(game)
+        //check that player can match the move used last (NOT to be used for general market)
+        if (player.toPick > 1 && player.canMatchMove()) {
+            player.socket.json({ message: Events.TURN_SWITCH })
+        }
+        else {
+            //pick cards from the market and switch to the next player
+            player.pick()
+            player.socket.json({ message: Events.PLAYER_HAND, hand: player.hand() })
+            game.turn.switch()
+            playTurn(game)
+        }
     }
 }
 
