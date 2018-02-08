@@ -12,6 +12,8 @@ app = express()
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: false }))
 
+app.use(require('./utils/cross-domain'))
+
 app.use('/', indexRoute)
 app.use('/games/', gameRoute)
 

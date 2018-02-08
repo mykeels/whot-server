@@ -59,24 +59,26 @@ const playTurn = (game) => {
 const listenAndInformPlayers = (instance) => {
     const game = instance.game;
 
+    const playerSelectorFn = (({ id, toPick, turn }) => ({ id, toPick, turn }))
+
     game.emitter.on(Events.HOLD_ON, (players) => {
-        instance.sockets.players.broadcast({ message: Events.HOLD_ON, players });
+        instance.sockets.players.broadcast({ message: Events.HOLD_ON, player: playerSelectorFn(player) });
     });
 
     game.emitter.on(Events.PICK_TWO, (players) => {
-        instance.sockets.players.broadcast({ message: Events.PICK_TWO, players });
+        instance.sockets.players.broadcast({ message: Events.PICK_TWO, player: playerSelectorFn(player) });
     });
 
-    game.emitter.on(Events.PICK_THREE, (players) => {
-        instance.sockets.players.broadcast({ message: Events.PICK_THREE, players });
+    game.emitter.on(Events.PICK_THREE, (player) => {
+        instance.sockets.players.broadcast({ message: Events.PICK_THREE, player: playerSelectorFn(player) });
     });
 
     game.emitter.on(Events.SUSPENSION, (players) => {
-        instance.sockets.players.broadcast({ message: Events.SUSPENSION, players });
+        instance.sockets.players.broadcast({ message: Events.SUSPENSION, players: players.map(playerSelectorFn) });
     });
 
     game.emitter.on(Events.GENERAL_MARKET, (players) => {
-        instance.sockets.players.broadcast({ message: Events.GENERAL_MARKET, players });
+        instance.sockets.players.broadcast({ message: Events.GENERAL_MARKET, players: players.map(playerSelectorFn) });
     });
 }
 
