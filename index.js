@@ -30,8 +30,10 @@ app.use(function(err, req, res, next) {
     res.send(err.toString())
 })
 
-var listener = app.listen(process.env.PORT || 8800, function(){
-    console.log('Listening on port ' + listener.address().port)
-})
+if (require.main === module) {
+    var listener = app.listen(process.env.PORT || 8800, function(){
+        console.log('Listening on port ' + listener.address().port)
+    })
+}
   
 module.exports = app
