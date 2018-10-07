@@ -8,6 +8,7 @@ const logger = require('../logger')('socket.route.js')
 const Events = {
     GAME_CREATE: 'game:create',
     GAME_START: 'game:start',
+    GAME_INFO: 'game:info',
     PLAYER_HAND: 'player:hand',
     PLAY: 'player:play',
     TURN_SWITCH: 'turn:switch',
@@ -66,7 +67,7 @@ const listenAndInformPlayers = (instance) => {
             instance.sockets.players.broadcast({ message: Events.HOLD_ON, players: players.map(playerSelectorFn) })
         })
     
-        game.emitter.on(Events.PICK_TWO, (players) => {
+        game.emitter.on(Events.PICK_TWO, (player) => {
             instance.sockets.players.broadcast({ message: Events.PICK_TWO, player: playerSelectorFn(player) })
         })
     
@@ -192,6 +193,17 @@ module.exports = (app, factory = new GameFactory()) => {
                             else {
                                 errorThrow('error:player-out-of-turn', ws)
                             }
+                        break;
+                        case Events.GAME_INFO:
+                            ws.username = messageData.username
+                            instance.sockets.players.broadcast({ 
+                                id, 
+                                message: Events.GAME_INFO, 
+                                playerId: ws.id, 
+                                type: ws.type, 
+                                players: instance.sockets.players.map(p => p.username), 
+                                listeners: instance.sockets.listeners.map(p => p.username)
+                            })
                         break;
                     }
                 })

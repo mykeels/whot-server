@@ -16,12 +16,23 @@ const noOfPlayersMandatoryFilter = (req, res, next) => {
     next()
 }
 
-router.use(noOfPlayersMandatoryFilter)
-
 module.exports = (factory = new GameFactory()) => {
     router.get('/', (req, res, next) => {
         return res.json(factory.games())
     })
+
+    router.get('/:id', (req, res, next) => {
+        const id = Number(req.params.id)
+        try {
+            return res.json(factory.game(id))
+        }
+        catch (err) {
+            if (err.status) return res.status(err.status).send(err.message)
+            return res.status(500).send(err)
+        }
+    })
+
+    router.post('/', noOfPlayersMandatoryFilter)
     router.post('/', (req, res, next) => {
         const noOfPlayers = req.body.noOfPlayers
         return res.json(factory.create(new Game({ noOfPlayers })))

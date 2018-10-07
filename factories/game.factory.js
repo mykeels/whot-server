@@ -35,6 +35,20 @@ function GameFactory() {
         return games[id]
     }
 
+    this.game = (id) => {
+        console.log('id', id)
+        const currentGame = games[id]
+        if (currentGame) {
+            const { id, game, sockets } = currentGame
+            return { 
+                id, 
+                players: sockets.players.map(p => p.username), 
+                listeners: sockets.listeners.map(l => l.username) 
+            }
+        }
+        throw { status: 404, message: 'Game not found' }
+    }
+
     this.exists = (id) => {
         return !!games[id]
     }
@@ -42,7 +56,7 @@ function GameFactory() {
     this.count = () => count
 
     this.games = () => {
-        return Object.keys(games)
+        return Object.values(games).map(({ id, game, sockets }) => ({ id, ...sockets.stats() }))
     }
 }
 
